@@ -1,43 +1,54 @@
 <template>
-  <div :class="['message-item', { 'own-message': props.isOwn }]">
+  <div :class="['message-item', { 'own-message': isOwn }]">
     <div class="message-content">
       <div class="message-header">
-        <span class="sender-name">{{ props.message.senderName }}</span>
-        <span class="message-time">{{ formatTime(props.message.timestamp) }}</span>
+        <span class="sender-name">{{ message.sender_id }}</span>
+        <span class="message-time">{{ formatTime(message.created_at) }}</span>
       </div>
       
       <div class="message-body">
-        <template v-if="props.message.encrypted">
+        <template v-if="message.encrypted_content">
           <i class="fas fa-lock encrypted-icon"></i>
         </template>
-        <p>{{ props.message.content }}</p>
+        <p>{{ message.decrypted_content || message.encrypted_content }}</p>
       </div>
 
       <div class="message-footer">
-        <span class="message-status" v-if="props.isOwn">
-          <i :class="['fas', props.message.delivered ? 'fa-check-double' : 'fa-check']"></i>
+        <span class="message-status" v-if="isOwn">
+          <i :class="['fas', message.is_read ? 'fa-check-double' : 'fa-check']"></i>
         </span>
       </div>
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import type { Message } from '@/types'
+<script lang="ts">
+import { defineComponent } from 'vue/dist/vue.runtime.esm-bundler'
+import type { Message } from '@/stores/messages'
 
-interface Props {
-  message: Message
-  isOwn: boolean
-}
+export default defineComponent({
+  name: 'MessageItem',
+  props: {
+    message: {
+      type: Object as () => Message,
+      required: true
+    },
+    isOwn: {
+      type: Boolean,
+      default: false
+    }
+  },
+  setup(props) {
+    const formatTime = (timestamp: string): string => {
+      const date = new Date(timestamp)
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }
 
-const props = withDefaults(defineProps<Props>(), {
-  isOwn: false
+    return {
+      formatTime
+    }
+  }
 })
-
-const formatTime = (timestamp: number): string => {
-  const date = new Date(timestamp)
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-}
 </script>
 
 <style scoped>

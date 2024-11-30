@@ -18,7 +18,7 @@
           v-for="message in messages"
           :key="message.id"
           :message="message"
-          :is-own="message.senderId === currentUserId"
+          :is-own="message.sender_id === currentUserId"
         />
       </template>
       <div v-else class="no-chat-selected">
@@ -45,65 +45,84 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, computed, onMounted, watch } from '@vue/runtime-core'
+<script lang="ts">
+import { defineComponent, ref, computed, onMounted, watch } from 'vue/dist/vue.runtime.esm-bundler'
 import { useMessagesStore } from '@/stores/messages'
 import { useAuthStore } from '@/stores/auth'
-import MessageItem from './MessageItem.vue'
-import type { Message } from '@/types/index'
+import MessageItem from '@/components/chat/MessageItem.vue'
+import type { Message } from '@/stores/messages'
 
-const messagesStore = useMessagesStore()
-const authStore = useAuthStore()
+export default defineComponent({
+  name: 'ChatWindow',
+  components: { MessageItem },
+  setup() {
+    const messagesStore = useMessagesStore()
+    const authStore = useAuthStore()
 
-const messagesContainer = ref<HTMLElement | null>(null)
-const newMessage = ref('')
-const isEncrypted = ref(true)
+    const messagesContainer = ref<HTMLElement | null>(null)
+    const newMessage = ref('')
+    const isEncrypted = ref(true)
 
-const currentUserId = computed(() => authStore.user?.id)
-const currentChat = computed(() => messagesStore.currentChat)
-const messages = computed<Message[]>(() => messagesStore.messages)
+    const currentUserId = computed(() => authStore.user?.id || null)
+    const currentChat = computed(() => messagesStore.currentChat)
+    const messages = computed(() => messagesStore.messages)
 
-const scrollToBottom = () => {
-  if (messagesContainer.value) {
-    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
-  }
-}
+    function toggleEncryption() {
+      isEncrypted.value = !isEncrypted.value
+    }
 
-const sendMessage = async () => {
-  if (!newMessage.value.trim() || !currentChat.value) return
-  
-  try {
-    await messagesStore.sendMessage({
-      content: newMessage.value,
-      chatId: currentChat.value.id,
-      encrypted: isEncrypted.value
+    function scrollToBottom() {
+      if (messagesContainer.value) {
+        messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+      }
+    }
+
+    async function sendMessage() {
+      if (!newMessage.value.trim() || !currentChat.value) return
+      
+      try {
+        await messagesStore.sendMessage({
+          content: newMessage.value,
+          chatId: Number(currentChat.value.id),
+          encrypted: isEncrypted.value
+        })
+        newMessage.value = ''
+        scrollToBottom()
+      } catch (error) {
+        console.error('Error sending message:', error)
+      }
+    }
+
+    async function clearHistory() {
+      if (!currentChat.value) return
+      if (confirm('Вы уверены, что хотите очистить историю чата?')) {
+        await messagesStore.clearHistory(Number(currentChat.value.id))
+      }
+    }
+
+    function attachFile() {
+      // Реализация прикрепления файлов будет добавлена позже
+    }
+
+    watch(() => messages.value, scrollToBottom, { deep: true })
+
+    onMounted(() => {
+      scrollToBottom()
     })
-    newMessage.value = ''
-    scrollToBottom()
-  } catch (error) {
-    console.error('Error sending message:', error)
+
+    return {
+      messagesContainer,
+      newMessage,
+      isEncrypted,
+      currentUserId,
+      currentChat,
+      messages,
+      toggleEncryption,
+      sendMessage,
+      clearHistory,
+      attachFile
+    }
   }
-}
-
-const toggleEncryption = () => {
-  isEncrypted.value = !isEncrypted.value
-}
-
-const clearHistory = async () => {
-  if (!currentChat.value) return
-  if (confirm('Вы уверены, что хотите очистить историю чата?')) {
-    await messagesStore.clearHistory(currentChat.value.id)
-  }
-}
-
-const attachFile = () => {
-  // Реализация прикрепления файлов будет добавлена позже
-}
-
-watch(() => messages.value, scrollToBottom, { deep: true })
-
-onMounted(() => {
-  scrollToBottom()
 })
 </script>
 

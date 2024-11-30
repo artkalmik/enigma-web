@@ -1,13 +1,9 @@
 /// <reference types="vite/client" />
 
 declare module '*.vue' {
-  import type { ComponentOptions } from '@vue/runtime-core'
-  const component: ComponentOptions
+  import { DefineComponent } from '@vue/runtime-core'
+  const component: DefineComponent
   export default component
 }
 
-declare module 'vue' {
-  interface ComponentCustomProperties {
-    $style: { [key: string]: string }
-  }
-} 
+export {} 
