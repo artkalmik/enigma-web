@@ -46,11 +46,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from '@vue/runtime-core'
 import { useMessagesStore } from '@/stores/messages'
 import { useAuthStore } from '@/stores/auth'
 import MessageItem from './MessageItem.vue'
-import type { Message } from '@/types'
+import type { Message } from '@/types/index'
 
 const messagesStore = useMessagesStore()
 const authStore = useAuthStore()
@@ -61,7 +61,7 @@ const isEncrypted = ref(true)
 
 const currentUserId = computed(() => authStore.user?.id)
 const currentChat = computed(() => messagesStore.currentChat)
-const messages = computed(() => messagesStore.messages)
+const messages = computed<Message[]>(() => messagesStore.messages)
 
 const scrollToBottom = () => {
   if (messagesContainer.value) {

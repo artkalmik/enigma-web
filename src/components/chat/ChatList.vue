@@ -73,9 +73,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed } from '@vue/runtime-core'
 import { useMessagesStore } from '@/stores/messages'
-import type { Chat } from '@/types'
+import type { Chat } from '@/types/index'
 
 const messagesStore = useMessagesStore()
 const searchQuery = ref('')

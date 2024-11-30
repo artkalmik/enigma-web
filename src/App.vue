@@ -65,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed } from 'vue/dist/vue.runtime.esm-bundler'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 

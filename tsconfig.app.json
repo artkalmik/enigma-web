@@ -8,6 +8,8 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["node", "vue"]
+    "types": ["node"],
+    "module": "es2015",
+    "moduleResolution": "node"
   }
 } 
