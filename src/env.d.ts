@@ -1,5 +1,4 @@
 /// <reference types="vite/client" />
-/// <reference types="vue/macros-global" />
 
 declare module '*.vue' {
   import type { DefineComponent } from 'vue'
@@ -16,10 +15,4 @@ interface ImportMetaEnv {
 
 interface ImportMeta {
   readonly env: ImportMetaEnv
-}
-
-declare module 'vue' {
-  interface ComponentCustomProperties {
-    $style: { [key: string]: string }
-  }
 } 
