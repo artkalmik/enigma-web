@@ -1,0 +1,130 @@
+<template>
+  <v-container class="fill-height">
+    <v-row justify="center">
+      <v-col cols="12" sm="8" md="6" lg="4">
+        <v-card class="elevation-12">
+          <v-toolbar color="primary" dark>
+            <v-toolbar-title>Вход в систему</v-toolbar-title>
+          </v-toolbar>
+
+          <v-card-text>
+            <v-form ref="form" v-model="isValid" @submit.prevent="handleSubmit">
+              <v-text-field
+                v-model="email"
+                label="Email"
+                prepend-icon="mdi-email"
+                type="email"
+                :rules="emailRules"
+                required
+              />
+
+              <v-text-field
+                v-model="password"
+                label="Пароль"
+                prepend-icon="mdi-lock"
+                :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                :type="showPassword ? 'text' : 'password'"
+                :rules="passwordRules"
+                @click:append="showPassword = !showPassword"
+                required
+              />
+
+              <v-text-field
+                v-if="requires2FA"
+                v-model="code2FA"
+                label="Код двухфакторной аутентификации"
+                prepend-icon="mdi-shield-lock"
+                type="text"
+                :rules="code2FARules"
+                required
+              />
+            </v-form>
+          </v-card-text>
+
+          <v-divider />
+
+          <v-card-actions>
+            <v-spacer />
+            <v-btn
+              color="primary"
+              :loading="loading"
+              :disabled="!isValid || loading"
+              @click="handleSubmit"
+            >
+              Войти
+            </v-btn>
+          </v-card-actions>
+
+          <v-card-text class="text-center">
+            <router-link to="/register">
+              Нет аккаунта? Зарегистрируйтесь
+            </router-link>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { useAppStore } from '@/stores/app'
+
+const authStore = useAuthStore()
+const appStore = useAppStore()
+
+const form = ref<any>(null)
+const isValid = ref(false)
+const loading = ref(false)
+const showPassword = ref(false)
+const requires2FA = ref(false)
+
+const email = ref('')
+const password = ref('')
+const code2FA = ref('')
+
+const emailRules = [
+  (v: string) => !!v || 'Email обязателен',
+  (v: string) => /.+@.+\..+/.test(v) || 'Email должен быть валидным'
+]
+
+const passwordRules = [
+  (v: string) => !!v || 'Пароль обязателен',
+  (v: string) => v.length >= 8 || 'Пароль должен быть не менее 8 символов'
+]
+
+const code2FARules = [
+  (v: string) => !!v || 'Код обязателен',
+  (v: string) => v.length === 6 || 'Код должен состоять из 6 цифр'
+]
+
+async function handleSubmit() {
+  if (!form.value?.validate()) return
+
+  try {
+    loading.value = true
+
+    if (requires2FA.value) {
+      await authStore.verify2FA(code2FA.value)
+    } else {
+      const result = await authStore.login({
+        email: email.value,
+        password: password.value
+      })
+
+      if (result.requires2FA) {
+        requires2FA.value = true
+        appStore.showSnackbar({
+          text: 'Введите код двухфакторной аутентификации',
+          color: 'info'
+        })
+      }
+    }
+  } catch (error) {
+    console.error('Login error:', error)
+  } finally {
+    loading.value = false
+  }
+}
+</script> 
