@@ -1,21 +1,21 @@
 <template>
-  <div :class="['message-item', { 'own-message': isOwn }]">
+  <div :class="['message-item', { 'own-message': props.isOwn }]">
     <div class="message-content">
       <div class="message-header">
-        <span class="sender-name">{{ message.senderName }}</span>
-        <span class="message-time">{{ formatTime(message.timestamp) }}</span>
+        <span class="sender-name">{{ props.message.senderName }}</span>
+        <span class="message-time">{{ formatTime(props.message.timestamp) }}</span>
       </div>
       
       <div class="message-body">
-        <template v-if="message.encrypted">
+        <template v-if="props.message.encrypted">
           <i class="fas fa-lock encrypted-icon"></i>
         </template>
-        <p>{{ message.content }}</p>
+        <p>{{ props.message.content }}</p>
       </div>
 
       <div class="message-footer">
-        <span class="message-status" v-if="isOwn">
-          <i :class="['fas', message.delivered ? 'fa-check-double' : 'fa-check']"></i>
+        <span class="message-status" v-if="props.isOwn">
+          <i :class="['fas', props.message.delivered ? 'fa-check-double' : 'fa-check']"></i>
         </span>
       </div>
     </div>
@@ -23,13 +23,16 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue'
-import { Message } from '@/types'
+import type { Message } from '@/types'
 
-const props = defineProps<{
+interface Props {
   message: Message
   isOwn: boolean
-}>()
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  isOwn: false
+})
 
 const formatTime = (timestamp: number): string => {
   const date = new Date(timestamp)

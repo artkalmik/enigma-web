@@ -13,7 +13,6 @@
         type="text"
         v-model="searchQuery"
         placeholder="Поиск чатов..."
-        @input="filterChats"
       />
     </div>
 
@@ -55,7 +54,6 @@
       </div>
     </div>
 
-    <!-- Диалог создания нового чата -->
     <dialog ref="newChatDialog" class="new-chat-dialog">
       <h3>Новый чат</h3>
       <form @submit.prevent="createNewChat">
@@ -77,7 +75,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useMessagesStore } from '@/stores/messages'
-import { Chat } from '@/types'
+import type { Chat } from '@/types'
 
 const messagesStore = useMessagesStore()
 const searchQuery = ref('')
@@ -91,7 +89,7 @@ const filteredChats = computed(() => {
   if (!searchQuery.value) return chats.value
   
   const query = searchQuery.value.toLowerCase()
-  return chats.value.filter(chat => 
+  return chats.value.filter((chat: Chat) => 
     chat.name.toLowerCase().includes(query) ||
     chat.lastMessage?.toLowerCase().includes(query)
   )
@@ -101,7 +99,7 @@ const selectChat = (chat: Chat) => {
   messagesStore.setCurrentChat(chat)
 }
 
-const formatTime = (timestamp: number): string => {
+const formatTime = (timestamp?: number): string => {
   if (!timestamp) return ''
   
   const date = new Date(timestamp)

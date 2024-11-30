@@ -46,11 +46,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useMessagesStore } from '@/stores/messages'
 import { useAuthStore } from '@/stores/auth'
 import MessageItem from './MessageItem.vue'
-import { Message } from '@/types'
+import type { Message } from '@/types'
 
 const messagesStore = useMessagesStore()
 const authStore = useAuthStore()
@@ -59,7 +59,7 @@ const messagesContainer = ref<HTMLElement | null>(null)
 const newMessage = ref('')
 const isEncrypted = ref(true)
 
-const currentUserId = authStore.user?.id
+const currentUserId = computed(() => authStore.user?.id)
 const currentChat = computed(() => messagesStore.currentChat)
 const messages = computed(() => messagesStore.messages)
 

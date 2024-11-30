@@ -21,6 +21,7 @@
     "web3": "^4.2.2"
   },
   "devDependencies": {
+    "@mdi/font": "^7.3.67",
     "@rushstack/eslint-patch": "^1.5.1",
     "@types/node": "^20.9.4",
     "@types/tweetnacl": "^1.0.2",
